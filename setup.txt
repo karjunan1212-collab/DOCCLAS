@@ -34,6 +34,8 @@ sudo a2enmod rewrite
 sudo systemctl restart apache2
  
 Edit the Default Apache Config
+
+sudo vi /etc/apache2/sites-available/000-default.conf
  
 ProxyPreserveHost On
  
@@ -44,6 +46,9 @@ ProxyPreserveHost On
 Restart Apache
 
 sudo systemctl restart apache2
+
+sudo ufw status
+sudo ufw allow 'Apache'
 
 
 

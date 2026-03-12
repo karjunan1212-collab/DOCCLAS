@@ -1,0 +1,135 @@
+<div class="arya-container">
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="header-top">
+      <h1>AI Document Intelligence in Lending</h1>
+      <div class="arya-logo-small">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23E8F4F8'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%231E5A7A' font-weight='bold'%3EA%3C/text%3E%3C/svg%3E" alt="Arya.ai">
+        <span>Arya.ai</span><br>
+        <small>an enterprise company</small>
+      </div>
+    </div>
+
+    <!-- Upload Section (Hidden if document uploaded) -->
+    <div class="upload-section" *ngIf="!uploadedFileName">
+      <div class="upload-box">
+        <input type="file" id="fileInput" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.png" style="display: none;">
+        <label for="fileInput" class="file-input-label">
+          📁 Upload your documents to begin
+        </label>
+      </div>
+    </div>
+
+    <!-- Pipeline Section -->
+    <div class="pipeline-section" *ngIf="uploadedFileName">
+      <!-- Step Circle Pipeline -->
+      <div class="workflow-pipeline">
+        <div *ngFor="let step of steps; let i = index; trackBy: trackByIndex" 
+             class="pipeline-box"
+             [class.completed]="step.isCompleted"
+             [class.processing]="step.isProcessing"
+             [class.locked]="!isStepAvailable(i)">
+          
+          <!-- Step Circle -->
+          <div class="step-circle" 
+               [class.filled]="step.isCompleted"
+               [class.active]="step.isProcessing"
+               [class.available]="!step.isCompleted && isStepAvailable(i)">
+            <span class="circle-icon" *ngIf="!step.isCompleted">{{ getStepIcon(i) }}</span>
+            <span class="circle-checkmark" *ngIf="step.isCompleted">✓</span>
+          </div>
+
+          <!-- Step Title -->
+          <h3 class="step-label">{{ step.name }}</h3>
+
+          <!-- Step Description -->
+          <p class="step-subtitle">{{ getStepDescription(i) }}</p>
+
+          <!-- Action Button -->
+          <button class="step-btn"
+                  *ngIf="!step.isCompleted"
+                  [disabled]="step.isProcessing || !isStepAvailable(i)"
+                  (click)="executeNextStep(i)">
+            <span *ngIf="!step.isProcessing">Start</span>
+            <span *ngIf="step.isProcessing" class="processing-text">
+              Processing<span class="dot dot-1">.</span><span class="dot dot-2">.</span><span class="dot dot-3">.</span>
+            </span>
+          </button>
+
+          <!-- Arrow Connector -->
+          <div class="arrow" *ngIf="i < steps.length - 1" [class.completed]="step.isCompleted">→</div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- Key Benefits Section -->
+      <div class="benefits-container">
+        <h2>Key Benefits</h2>
+        
+        <div class="benefits-grid">
+          <div class="benefit-item">
+            <div class="benefit-circle">
+              <span>⏱️</span>
+            </div>
+            <h3>Faster TAT</h3>
+            <p>Minutes instead of hours or days</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-circle">
+              <span>🎯</span>
+            </div>
+            <h3>High Accuracy</h3>
+            <p>Trained on diverse document formats</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-circle">
+              <span>⚙️</span>
+            </div>
+            <h3>Built-in Fraud Detection</h3>
+            <p>Catches patterns rules miss</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-circle">
+              <span>📉</span>
+            </div>
+            <h3>Reduced Manual Review</h3>
+            <p>Only edge cases routed to humans</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-circle">
+              <span>🌍</span>
+            </div>
+            <h3>Scalable & Multilingual</h3>
+            <p>Handles global customers with ease</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-tracker" *ngIf="getCompletedCount() > 0">
+        <div class="progress-info">
+          <span>Progress: {{ getCompletedCount() }}/{{ steps.length }} steps completed</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="(getCompletedCount() / steps.length) * 100"></div>
+        </div>
+      </div>
+
+      <!-- Completion Message -->
+      <div class="completion-message" *ngIf="isAllCompleted()">
+        <div class="completion-box">
+          <h3>✓ Document Processing Complete</h3>
+          <p>All AI agents have successfully processed your document.</p>
+          <button class="btn-process-new" (click)="resetProcess()">Process Another Document</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

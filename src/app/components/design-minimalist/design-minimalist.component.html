@@ -1,0 +1,53 @@
+<div class="minimalist-container">
+  <div class="header">
+    <h1>Document Processing</h1>
+    <p class="subtitle">Upload and process your documents through our intelligent workflow</p>
+  </div>
+
+  <div class="upload-section">
+    <div class="upload-area">
+      <input type="file" #fileInput (change)="onFileSelected($event)" id="fileInput" hidden accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+      <label for="fileInput" class="upload-label">
+        <div class="upload-icon">📄</div>
+        <p class="upload-text">Click to upload or drag files here</p>
+        <p class="upload-hint">Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG</p>
+      </label>
+      <div *ngIf="uploadedFileName" class="uploaded-file">
+        ✓ {{ uploadedFileName }}
+      </div>
+    </div>
+  </div>
+
+  <div class="steps-section">
+    <div class="steps-horizontal">
+      <div *ngFor="let step of steps; let i = index" class="step-item">
+        <div [class.step-circle]="true" 
+             [class.completed]="step.isCompleted" 
+             [class.active]="step.isProcessing">
+          {{ i + 1 }}
+        </div>
+        <p class="step-title">{{ step.name }}</p>
+        <div *ngIf="i < steps.length - 1" class="step-connector" [class.completed]="step.isCompleted"></div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="uploadedFileName && !allCompleted" class="action-section">
+    <button 
+      class="btn btn-next" 
+      (click)="executeNextStep()" 
+      [disabled]="processing || !documentService.canProcessNext()"
+      [class.loading]="processing">
+      <span *ngIf="!processing">Execute Next Step →</span>
+      <span *ngIf="processing">Processing...</span>
+    </button>
+  </div>
+
+  <div *ngIf="allCompleted" class="completion-section">
+    <div class="success-message">
+      <h2>✓ All Steps Completed</h2>
+      <p>Your document has been successfully processed.</p>
+      <button class="btn btn-reset" (click)="resetProcess()">Process Another Document</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,102 @@
+<div class="circular-container">
+  <div class="circular-header">
+    <h1>Workflow Engine</h1>
+    <p>Visual document processing workflow</p>
+  </div>
+
+  <div class="circular-wrapper">
+    <div class="circular-main">
+      <!-- Circular Progress -->
+      <div class="circle-container">
+        <svg class="circle-svg" viewBox="0 0 200 200">
+          <!-- Background circle -->
+          <circle cx="100" cy="100" r="90" class="circle-bg"></circle>
+          <!-- Progress circle -->
+          <circle 
+            cx="100" 
+            cy="100" 
+            r="90" 
+            class="circle-progress" 
+            [style.strokeDashoffset]="565 - (circlePercentage / 100) * 565">
+          </circle>
+        </svg>
+
+        <div class="circle-content">
+          <div *ngIf="!uploadedFileName" class="circle-upload">
+            <div class="upload-icon">📄</div>
+            <p>Ready to upload</p>
+          </div>
+          <div *ngIf="uploadedFileName && !allCompleted" class="circle-progress-info">
+            <div class="progress-percentage">{{ circlePercentage | number: '1.0-0' }}%</div>
+            <div class="progress-step">Step {{ currentStepNumber }}/{{ steps.length }}</div>
+          </div>
+          <div *ngIf="allCompleted" class="circle-success">
+            <div class="success-icon">✓</div>
+            <p>Complete!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps around circle -->
+      <div class="steps-container">
+        <div *ngFor="let step of steps; let i = index" class="step-position" [style.transform]="'rotate(' + getRotation(i) + 'deg) translateY(-140px) rotate(' + (-getRotation(i)) + 'deg)'">
+          <div class="step-orb" [class.completed]="step.isCompleted" [class.active]="step.isProcessing">
+            <span class="step-label">{{ i + 1 }}</span>
+          </div>
+          <p class="step-name">{{ step.name }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <!-- Upload section -->
+      <div class="panel-section">
+        <h2>Upload Document</h2>
+        <div class="upload-drop">
+          <input type="file" #fileInput (change)="onFileSelected($event)" id="fileInput" hidden accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+          <label for="fileInput" class="drop-area">
+            <div class="drop-icon">📁</div>
+            <p class="drop-text">Click or drag to upload</p>
+          </label>
+          <div *ngIf="uploadedFileName" class="file-badge">
+            ✓ {{ uploadedFileName }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps details -->
+      <div *ngIf="uploadedFileName" class="panel-section steps-detail">
+        <h2>Processing Steps</h2>
+        <div class="steps-list">
+          <div *ngFor="let step of steps" class="list-item" [class.completed]="step.isCompleted" [class.active]="step.isProcessing">
+            <div class="list-indicator" [class.completed]="step.isCompleted">
+              {{ step.isCompleted ? '✓' : '○' }}
+            </div>
+            <div class="list-content">
+              <p class="list-title">{{ step.name }}</p>
+              <p class="list-desc">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div *ngIf="uploadedFileName" class="panel-section actions">
+        <div *ngIf="!allCompleted">
+          <button 
+            class="btn btn-action" 
+            (click)="executeNextStep()" 
+            [disabled]="processing || !documentService.canProcessNext()"
+            [class.loading]="processing">
+            <span *ngIf="!processing">Execute Next Step</span>
+            <span *ngIf="processing">⏳ Processing...</span>
+          </button>
+        </div>
+        <div *ngIf="allCompleted" class="completion-action">
+          <p class="completion-text">✓ All steps completed successfully!</p>
+          <button class="btn btn-secondary" (click)="resetProcess()">Start Over</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

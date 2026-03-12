@@ -1,0 +1,83 @@
+<div class="timeline-container">
+  <div class="timeline-header">
+    <h1>Smart Document Processing</h1>
+    <p>Follow the workflow step by step</p>
+  </div>
+
+  <div class="timeline-content">
+    <div class="left-section">
+      <div class="upload-box">
+        <h2>Upload Document</h2>
+        <div class="upload-area">
+          <input type="file" #fileInput (change)="onFileSelected($event)" id="fileInput" hidden accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+          <label for="fileInput" class="upload-label">
+            <div class="upload-icon">📤</div>
+            <p class="upload-instruction">Click to upload document</p>
+          </label>
+          <div *ngIf="uploadedFileName" class="upload-status">
+            ✓ {{ uploadedFileName }}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="uploadedFileName" class="status-overview">
+        <div class="overview-card">
+          <h3>Processing Status</h3>
+          <div class="status-stat">
+            <span class="stat-label">Completed Steps:</span>
+            <span class="stat-value">{{ completedCount }}/{{ steps.length }}</span>
+          </div>
+          <div class="status-stat">
+            <span class="stat-label">Status:</span>
+            <span class="stat-value" [class.completed]="allCompleted">
+              {{ allCompleted ? 'Finished' : 'Processing' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-section">
+      <div class="timeline">
+        <div *ngFor="let step of steps; let i = index; let last = last;" class="timeline-item">
+          <div class="timeline-marker" [class.completed]="step.isCompleted" [class.active]="step.isProcessing">
+            <span class="marker-number" *ngIf="!step.isCompleted">{{ i + 1 }}</span>
+            <span class="marker-icon" *ngIf="step.isCompleted">✓</span>
+            <span *ngIf="step.isProcessing && !step.isCompleted" class="spinner"></span>
+          </div>
+          
+          <div *ngIf="!last" class="timeline-connector" [class.completed]="step.isCompleted"></div>
+
+          <div class="timeline-content-box" [class.completed]="step.isCompleted" [class.active]="step.isProcessing">
+            <h3 class="content-title">{{ step.name }}</h3>
+            <p class="content-description">{{ step.description }}</p>
+            <div class="content-badge">
+              <span *ngIf="step.isCompleted" class="badge completed">✓ Completed</span>
+              <span *ngIf="step.isProcessing && !step.isCompleted" class="badge active">○ Processing</span>
+              <span *ngIf="!step.isCompleted && !step.isProcessing" class="badge pending">○ Pending</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="uploadedFileName" class="timeline-actions">
+    <div *ngIf="!allCompleted" class="action-section">
+      <button 
+        class="btn btn-continue" 
+        (click)="executeNextStep()" 
+        [disabled]="processing || !documentService.canProcessNext()"
+        [class.loading]="processing">
+        <span *ngIf="!processing">Continue →</span>
+        <span *ngIf="processing">Processing...</span>
+      </button>
+    </div>
+
+    <div *ngIf="allCompleted" class="completion-box">
+      <h2>✓ Processing Complete</h2>
+      <p>All stages have been successfully completed.</p>
+      <button class="btn btn-new" (click)="resetProcess()">Process Another Document</button>
+    </div>
+  </div>
+</div>

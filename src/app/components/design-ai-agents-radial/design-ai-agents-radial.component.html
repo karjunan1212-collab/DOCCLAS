@@ -1,0 +1,151 @@
+<div class="ai-agents-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Document Classification Agent</h1>
+    <div class="header-subtitle">Multi-Agent Document Processing System</div>
+  </div>
+
+  <!-- Main Layout: Left Upload | Center Network | Right Tasks -->
+  <div class="layout-container">
+    <!-- LEFT SIDE: Upload Section -->
+    <div class="left-panel">
+      <div class="upload-card">
+        <div class="upload-header">📁 Upload Documents</div>
+        
+        <!-- Upload Type Switch -->
+        <div class="upload-switch-container">
+          <span class="switch-label" [class.active]="!isMultipleUpload">📄 Single</span>
+          <label class="upload-switch">
+            <input type="checkbox" [(ngModel)]="isMultipleUpload">
+            <span class="slider"></span>
+          </label>
+          <span class="switch-label" [class.active]="isMultipleUpload">📚 Multiple</span>
+        </div>
+
+        <!-- File Input -->
+        <label class="upload-button-wrapper">
+          <input type="file" [multiple]="isMultipleUpload" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.png" style="display: none;">
+          <div class="upload-button">
+            <span class="button-icon">{{ isMultipleUpload ? '📚' : '📄' }}</span>
+            <span class="button-text">{{ isMultipleUpload ? 'Select Multiple Files' : 'Select a File' }}</span>
+          </div>
+        </label>
+
+        <div class="file-info" *ngIf="uploadedFileName">
+          <div class="file-name">{{ uploadedFileName }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: Circular Agents Network -->
+    <div class="center-panel">
+      <div class="agents-network">
+        <!-- Center Circle with AI Core -->
+        <div class="ai-core">
+          <div class="core-content">
+            <span class="core-icon">🤖</span>
+            <span class="core-text">Doc</span>
+            <span class="core-subtext">Classification</span>
+          </div>
+        </div>
+
+        <!-- Agent Positions (5 agents in circular layout) -->
+        <div class="agents-circle">
+          <div *ngFor="let agent of agents; let i = index" 
+               class="agent-position"
+               [style.--agent-index]="i"
+               [class.active]="activeAgentIndex === i">
+            <div class="agent-card">
+              <div class="agent-icon">{{ agent.icon }}</div>
+              <div class="agent-name">{{ agent.name }}</div>
+              <div class="agent-description">{{ agent.description }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connection Lines -->
+        <svg #connectionSvg class="connection-svg" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+          <circle cx="300" cy="300" r="150" class="center-circle" fill="none" stroke="rgba(30, 90, 122, 0.1)" stroke-width="2"/>
+          <circle cx="300" cy="300" r="200" class="outer-circle" fill="none" stroke="rgba(30, 90, 122, 0.05)" stroke-width="1"/>
+          
+            <!-- Lines to each agent (generated dynamically to align with agent centers) -->
+            <line *ngFor="let l of connectionLines"
+                  class="connection-line"
+                  [attr.x1]="l.x1"
+                  [attr.y1]="l.y1"
+                  [attr.x2]="l.x2"
+                  [attr.y2]="l.y2"></line>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: Task Status Section -->
+    <div class="right-panel">
+      <div class="task-section">
+        <h2>Processing Tasks</h2>
+        
+        <div class="tasks-list">
+          <div *ngFor="let step of steps; let i = index; trackBy: trackByIndex"
+               class="task-card"
+               [class.completed]="step.isCompleted"
+               [class.processing]="step.isProcessing"
+               [class.locked]="!isStepAvailable(i)">
+            
+            <div class="task-header">
+              <span class="task-icon">{{ taskIcons[i] }}</span>
+              <span class="task-name">{{ step.name }} Agent</span>
+            </div>
+
+            <div class="task-status-line" *ngIf="step.isProcessing || step.isCompleted">
+              <span class="status-text">{{ (stepMessages && stepMessages[i]) ? stepMessages[i] : taskStatuses[i] }}</span>
+            </div>
+
+            <button class="task-btn"
+                    *ngIf="!step.isCompleted && i < 4"
+                    [disabled]="step.isProcessing || !isStepAvailable(i) || !uploadedFileName"
+                    (click)="executeNextStep(i)">
+              <span *ngIf="!step.isProcessing">Start</span>
+              <span *ngIf="step.isProcessing" class="processing-dots">
+                Processing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+              </span>
+            </button>
+
+            <button class="task-btn download-btn" [ngClass]="{ 'disabled': step.isProcessing || !isStepAvailable(i) || !uploadedFileName }"
+                    *ngIf="i === 4 && !step.isCompleted"
+                    [disabled]="step.isProcessing || !isStepAvailable(i) || !uploadedFileName"
+                    (click)="executeDownloadStep(i)">
+              <span *ngIf="!step.isProcessing">Download</span>
+              <span *ngIf="step.isProcessing" class="processing-dots">
+                Processing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+              </span>
+            </button>
+
+            <div class="task-completed" *ngIf="step.isCompleted">
+              <span class="checkmark-animation">✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <!-- <div class="progress-section">
+        <div class="progress-header">
+          <span class="progress-text">{{ getCompletedCount() }}/{{ steps.length }} Completed</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="(getCompletedCount() / steps.length) * 100"></div>
+        </div>
+      </div> -->
+
+      <!-- Completion Message -->
+      <!-- <div class="completion-section" *ngIf="isAllCompleted()">
+        <div class="completion-card">
+          <div class="completion-icon">🎉</div>
+          <h3>Completed!</h3>
+          <p>All agents processed successfully.</p>
+          <button class="btn-reset" (click)="resetProcess()">Process Another</button>
+        </div>
+      </div> -->
+    </div>
+  </div>
+</div>

@@ -1,0 +1,140 @@
+<div class="digital-human-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Digital Human Intelligence</h1>
+    <div class="header-subtitle">AI-Powered Multi-Capability Processing</div>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="upload-section" *ngIf="!uploadedFileName">
+    <div class="upload-box">
+      <input type="file" id="fileInput" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.png" style="display: none;">
+      <label for="fileInput" class="file-input-label">
+        📁 Activate Digital Mind
+      </label>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" *ngIf="uploadedFileName">
+    <!-- Digital Human Neural Network -->
+    <div class="neural-network">
+      <!-- SVG Connection Lines -->
+      <svg class="connections-svg" viewBox="0 0 600 600">
+        <defs>
+          <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0" />
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        
+        <!-- Connection Lines (drawn first = behind) -->
+        <line x1="300" y1="300" x2="300" y2="48" class="connection-line" stroke="#00ff88" />
+        <line x1="300" y1="300" x2="440" y2="95" class="connection-line" stroke="#00ffff" />
+        <line x1="300" y1="300" x2="560" y2="200" class="connection-line" stroke="#00ff88" />
+        <line x1="300" y1="300" x2="560" y2="336" class="connection-line" stroke="#ff00ff" />
+        <line x1="300" y1="300" x2="440" y2="474" class="connection-line" stroke="#00ffff" />
+        <line x1="300" y1="300" x2="300" y2="540" class="connection-line" stroke="#ffff00" />
+        <line x1="300" y1="300" x2="122" y2="474" class="connection-line" stroke="#00ff88" />
+        <line x1="300" y1="300" x2="40" y2="336" class="connection-line" stroke="#ff00ff" />
+        <line x1="300" y1="300" x2="40" y2="200" class="connection-line" stroke="#00ffff" />
+        <line x1="300" y1="300" x2="122" y2="95" class="connection-line" stroke="#00ff88" />
+
+        <!-- Central Glow Circle (drawn last = on top) -->
+        <circle cx="300" cy="300" r="80" fill="url(#glowGradient)" filter="url(#glow)" class="glow-circle" />
+        <!-- Mind Boundary (drawn last = on top) -->
+        <circle cx="300" cy="300" r="70" class="mind-boundary" stroke="#00ffff" stroke-width="2" fill="none" />
+      </svg>
+
+      <!-- Digital Human Head (Center) -->
+      <div class="digital-head">
+        <div class="head-glow"></div>
+        <div class="head-content">
+          <span class="head-icon">🧠</span>
+          <span class="head-label">Digital</span>
+          <span class="head-sublabel">Mind</span>
+        </div>
+      </div>
+
+      <!-- Capability Icons in Circle -->
+      <div class="capabilities-ring">
+        <div *ngFor="let cap of capabilities; let i = index" 
+             class="capability-node"
+             [class]="'position-' + (i % 10)"
+             [class.active]="processingStepIndex >= 0">
+          <div class="capability-item">
+            <div class="capability-icon">{{ cap.icon }}</div>
+            <div class="capability-label">{{ cap.label }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Processing Section -->
+    <div class="processing-section">
+      <h2>Processing Pipeline</h2>
+      
+      <div class="steps-container">
+        <div *ngFor="let step of steps; let i = index; trackBy: trackByIndex"
+             class="step-item"
+             [class.completed]="step.isCompleted"
+             [class.processing]="step.isProcessing"
+             [class.locked]="!isStepAvailable(i)">
+          
+          <div class="step-inner">
+            <div class="step-number">
+              <span *ngIf="!step.isCompleted && !step.isProcessing">{{ i + 1 }}</span>
+              <span *ngIf="step.isProcessing" class="processing-spinner">⚡</span>
+              <span *ngIf="step.isCompleted" class="checkmark">✓</span>
+            </div>
+
+            <div class="step-content">
+              <h3 class="step-name">{{ step.name }}</h3>
+              <p class="step-desc">{{ step.description }}</p>
+            </div>
+
+            <button class="step-action"
+                    *ngIf="!step.isCompleted"
+                    [disabled]="step.isProcessing || !isStepAvailable(i)"
+                    (click)="executeNextStep(i)">
+              <span *ngIf="!step.isProcessing">Execute</span>
+              <span *ngIf="step.isProcessing" class="action-dots">
+                <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-label">
+        <span>Processing Progress</span>
+        <span class="progress-count">{{ getCompletedCount() }}/{{ steps.length }}</span>
+      </div>
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="(getCompletedCount() / steps.length) * 100"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion State -->
+    <div class="completion-container" *ngIf="isAllCompleted()">
+      <div class="completion-content">
+        <div class="completion-icon">✨</div>
+        <h3>Processing Complete!</h3>
+        <p>All documents have been processed by the digital mind.</p>
+        <button class="completion-btn" (click)="resetProcess()">Process Another Document</button>
+      </div>
+    </div>
+  </div>
+</div>

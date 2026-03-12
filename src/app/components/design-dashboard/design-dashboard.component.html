@@ -1,0 +1,163 @@
+<div class="dashboard-container">
+  <!-- Top Navigation -->
+  <div class="top-nav">
+    <div class="nav-left">
+      <h1 class="app-title">📊 Document Processing Dashboard</h1>
+    </div>
+    <div class="nav-right">
+      <span class="nav-status" [class.completed]="allCompleted">
+        {{ allCompleted ? '✓ Complete' : '⏳ Processing' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Grid -->
+  <div class="dashboard-grid">
+    <!-- Left Panel - Upload & File Info -->
+    <div class="dashboard-section upload-section">
+      <div class="section-header">
+        <h2>📁 Document Upload</h2>
+      </div>
+      <div class="section-content">
+        <div class="upload-zone">
+          <input type="file" #fileInput (change)="onFileSelected($event)" id="fileInput" hidden accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+          <label for="fileInput" class="zone-label">
+            <div class="zone-icon">⬆️</div>
+            <p class="zone-text">Click to upload file</p>
+            <p class="zone-hint">PDF, DOC, DOCX, TXT, PNG, JPG</p>
+          </label>
+        </div>
+
+        <div *ngIf="uploadedFileName" class="file-details">
+          <div class="detail-item">
+            <span class="detail-label">File Name:</span>
+            <span class="detail-value">{{ uploadedFileName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value" [class.active]="uploadedFileName">Ready to Process</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Panel - Processing Workflow -->
+    <div class="dashboard-section workflow-section">
+      <div class="section-header">
+        <h2>⚙️ Processing Workflow</h2>
+        <span class="section-badge" *ngIf="uploadedFileName">{{ completedCount }}/{{ steps.length }}</span>
+      </div>
+      <div class="section-content">
+        <div class="workflow-steps">
+          <div *ngFor="let step of steps; let i = index" class="workflow-item">
+            <div class="item-header">
+              <div class="item-number" [class.completed]="step.isCompleted" [class.active]="step.isProcessing">
+                {{ step.isCompleted ? '✓' : i + 1 }}
+              </div>
+              <div class="item-info">
+                <h3 class="item-title">{{ step.name }}</h3>
+                <p class="item-desc">{{ step.description }}</p>
+              </div>
+            </div>
+            <div class="item-status">
+              <span *ngIf="step.isCompleted" class="status-label completed">Completed</span>
+              <span *ngIf="step.isProcessing && !step.isCompleted" class="status-label active">Processing...</span>
+              <span *ngIf="!step.isCompleted && !step.isProcessing" class="status-label pending">Pending</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Stats & Actions -->
+    <div class="dashboard-section stats-section">
+      <div class="section-header">
+        <h2>📈 Progress Stats</h2>
+      </div>
+      <div class="section-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon completed">✓</div>
+            <div class="stat-info">
+              <p class="stat-label">Completed</p>
+              <p class="stat-number">{{ completedCount }}</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon pending">○</div>
+            <div class="stat-info">
+              <p class="stat-label">Pending</p>
+              <p class="stat-number">{{ pendingCount }}</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon total">◆</div>
+            <div class="stat-info">
+              <p class="stat-label">Total Steps</p>
+              <p class="stat-number">{{ steps.length }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Visualization -->
+        <div class="progress-viz">
+          <div class="progress-label">Overall Progress</div>
+          <div class="progress-segments">
+            <div *ngFor="let step of steps" class="segment" [class.completed]="step.isCompleted" [title]="step.name"></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions-panel">
+          <div *ngIf="!allCompleted && uploadedFileName">
+            <button 
+              class="btn btn-execute" 
+              (click)="executeNextStep()" 
+              [disabled]="processing || !documentService.canProcessNext()"
+              [class.loading]="processing">
+              <span *ngIf="!processing">⚡ Execute Next</span>
+              <span *ngIf="processing">⏳ Executing...</span>
+            </button>
+          </div>
+
+          <div *ngIf="allCompleted" class="completion-panel">
+            <div class="success-badge">✓ All Steps Complete</div>
+            <button class="btn btn-reset" (click)="resetProcess()">Process New File</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Panel - System Info -->
+  <div *ngIf="uploadedFileName" class="dashboard-section bottom-section">
+    <div class="section-header">
+      <h2>ℹ️ Workflow Information</h2>
+    </div>
+    <div class="section-content">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-title">Document:</span>
+          <span class="info-value">{{ uploadedFileName }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-title">Current Step:</span>
+          <span class="info-value" *ngIf="!allCompleted">
+            {{ currentActiveStep?.name || 'Ready' }}
+          </span>
+          <span class="info-value" *ngIf="allCompleted">Completed</span>
+        </div>
+        <div class="info-item">
+          <span class="info-title">Completion Rate:</span>
+          <span class="info-value">{{ (completedCount / steps.length * 100) | number: '1.0-0' }}%</span>
+        </div>
+        <div class="info-item">
+          <span class="info-title">Processing Type:</span>
+          <span class="info-value">Automated</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

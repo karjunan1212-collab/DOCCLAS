@@ -1,0 +1,89 @@
+<div class="ai-agents-container">
+  <div class="header-section">
+    <h1 class="main-title">
+      <i class="fas fa-brain"></i>
+      AI-Powered Document Processing
+    </h1>
+    <p class="subtitle">Intelligent agents analyzing your lending documents</p>
+  </div>
+
+  <div class="upload-section" *ngIf="!steps.length">
+    <div class="upload-card">
+      <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+      <h3>Upload Document</h3>
+      <p>Start the AI processing pipeline</p>
+      <input type="file" id="fileInput" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" style="display: none;">
+      <label for="fileInput" class="upload-btn">
+        <i class="fas fa-plus"></i> Choose File
+      </label>
+    </div>
+  </div>
+
+  <div class="agents-workflow" *ngIf="steps.length">
+    <div class="workflow-header">
+      <h2>AI Agent Processing Pipeline</h2>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+      </div>
+      <span class="progress-text">{{getCompletedCount()}}/{{steps.length}} Tasks Completed</span>
+    </div>
+
+    <div class="agents-grid">
+      <div class="agent-card"
+           *ngFor="let step of steps; let i = index; trackBy: trackByIndex"
+           [class.completed]="step.isCompleted"
+           [class.processing]="step.isProcessing"
+           [class.pending]="!step.isCompleted && !step.isProcessing">
+
+        <div class="agent-avatar">
+          <span class="agent-icon">{{getAgentIcon(i)}}</span>
+        </div>
+
+        <div class="agent-info">
+          <h3 class="agent-name">{{getAgentName(i)}}</h3>
+          <p class="agent-role">{{step.name}}</p>
+          <div class="status-indicator">
+            <span class="status-text" *ngIf="!step.isCompleted && !step.isProcessing">Waiting</span>
+            <span class="status-text processing" *ngIf="step.isProcessing">
+              <i class="fas fa-cog fa-spin"></i> Processing...
+            </span>
+            <span class="status-text completed" *ngIf="step.isCompleted">
+              <i class="fas fa-check-circle"></i> Completed
+            </span>
+          </div>
+        </div>
+
+        <div class="agent-actions">
+          <button class="action-btn"
+                  [disabled]="step.isProcessing || step.isCompleted || !isStepAvailable(i)"
+                  (click)="executeNextStep(i)"
+                  *ngIf="!step.isCompleted">
+            <span *ngIf="!step.isProcessing">Start Task</span>
+            <span *ngIf="step.isProcessing">Processing...</span>
+          </button>
+
+          <div class="completion-badge" *ngIf="step.isCompleted">
+            <i class="fas fa-check"></i>
+            Task Completed
+          </div>
+        </div>
+
+        <div class="agent-progress" *ngIf="step.isProcessing">
+          <div class="progress-circle">
+            <div class="progress-circle-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="workflow-footer" *ngIf="isAllCompleted()">
+      <div class="completion-message">
+        <i class="fas fa-trophy"></i>
+        <h3>All AI Agents Completed!</h3>
+        <p>Your document has been fully processed by our intelligent agent pipeline.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+<div class="card-based-container">
+  <div class="navbar">
+    <h1 class="navbar-title">📋 Document Processing Hub</h1>
+  </div>
+
+  <div class="main-content">
+    <div class="upload-card">
+      <h2>Step 1: Upload Document</h2>
+      <div class="upload-drop-zone">
+        <input type="file" #fileInput (change)="onFileSelected($event)" id="fileInput" hidden accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+        <label for="fileInput" class="drop-label">
+          <div class="drop-icon">📁</div>
+          <p class="drop-title">Drag your document here or click to browse</p>
+          <p class="drop-subtitle">PDF, DOC, DOCX, TXT, PNG, JPG</p>
+        </label>
+        <div *ngIf="uploadedFileName" class="file-info">
+          <span class="file-name">✓ {{ uploadedFileName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="uploadedFileName" class="processing-section">
+      <div class="progress-container">
+        <div class="progress-header">
+          <h3>Overall Progress</h3>
+          <span class="progress-percentage">{{ progressPercentage | number: '1.0-0' }}%</span>
+        </div>
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps-grid">
+        <div *ngFor="let step of steps; let i = index" class="step-card" [class.completed]="step.isCompleted" [class.active]="step.isProcessing">
+          <div class="card-header">
+            <span class="step-number" [class.completed]="step.isCompleted">
+              {{ step.isCompleted ? '✓' : i + 1 }}
+            </span>
+            <h3 class="step-title">{{ step.name }}</h3>
+          </div>
+          <p class="step-description">{{ step.description }}</p>
+          <div class="card-status">
+            <span *ngIf="step.isCompleted" class="status-badge completed">Completed</span>
+            <span *ngIf="step.isProcessing && !step.isCompleted" class="status-badge active">In Progress</span>
+            <span *ngIf="!step.isCompleted && !step.isProcessing" class="status-badge pending">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!allCompleted" class="action-buttons">
+        <button 
+          class="btn btn-primary" 
+          (click)="executeNextStep()" 
+          [disabled]="processing || !documentService.canProcessNext()"
+          [class.loading]="processing">
+          <span *ngIf="!processing">Execute Next Step</span>
+          <span *ngIf="processing">⏳ Processing...</span>
+        </button>
+      </div>
+
+      <div *ngIf="allCompleted" class="completion-banner">
+        <div class="success-icon">✓</div>
+        <h2>All Processing Complete!</h2>
+        <p>Your document has been successfully processed through all stages.</p>
+        <button class="btn btn-secondary" (click)="resetProcess()">Start New Document</button>
+      </div>
+    </div>
+  </div>
+</div>

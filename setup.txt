@@ -1,0 +1,73 @@
+Copy files-----
+ 
+sudo cp /home/ubuntu/document-processing-app/browser/* /var/www/html/
+ 
+Create:
+ 
+sudo nano /var/www/html/.htaccess
+ 
+Add:
+ 
+<IfModule mod_rewrite.c>
+
+RewriteEngine On
+
+RewriteBase /
+ 
+RewriteRule ^index\.html$ - [L]
+ 
+RewriteCond %{REQUEST_FILENAME} !-f
+
+RewriteCond %{REQUEST_FILENAME} !-d
+ 
+RewriteRule . /index.html [L]
+</IfModule>
+ 
+Enable Apache Proxy Modules
+ 
+sudo a2enmod proxy
+
+sudo a2enmod proxy_http
+
+sudo a2enmod rewrite
+
+sudo systemctl restart apache2
+ 
+Edit the Default Apache Config
+ 
+ProxyPreserveHost On
+ 
+    ProxyPass /api http://127.0.0.1:8000/
+
+    ProxyPassReverse /api http://127.0.0.1:8000/
+ 
+Restart Apache
+
+sudo systemctl restart apache2
+
+
+
+
+
+doc.py----
+from time import sleep
+from fastapi import FastAPI
+ 
+app = FastAPI()
+ 
+@app.get("/getdoc")
+def hello():
+    sleep(20)
+    return {"message": "get DOC sucessfull"}
+
+@app.get("/getocr")
+def hello():
+    sleep(20)
+    return {"message": "OCR Sucessful"}
+
+@app.get("/getclassify")
+def hello():
+    sleep(20)
+    return {"message": "Classification Successful"}
+
+ 

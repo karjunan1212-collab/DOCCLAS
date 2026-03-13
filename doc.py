@@ -41,14 +41,14 @@ LINUX_WRAPPER_URL = "http://10.217.226.69:8001"  # Change to your Linux IP
 # LINUX_WRAPPER_URL = "http://your-linux-server.com:8001"
 
 
-@app.get("/getval")
-def hello():
-    sleep(20)
-    return {"message": "get DOC sucessfull"}
+#@app.get("/getval")
+#def hello():
+#    sleep(20)
+#    return {"message": "get DOC sucessfull"}
 
 
 
-@app.get("/getval1")  # Changed to POST to accept file
+@app.post("/getval")  # Changed to POST to accept file
 #async def validate_document(file: UploadFile = File(...)):
 async def validate_document(file: UploadFile = File(r'C:\Users\Karthikeyan188767\Documents\docblitz\De_IB_Doc.pdf')):    
     
@@ -56,7 +56,7 @@ async def validate_document(file: UploadFile = File(r'C:\Users\Karthikeyan188767
     try:
         # Forward file to Linux wrapper
         files = {"file": (file.filename, file.file, file.content_type)}
-        response = requests.post(f"{LINUX_WRAPPER_URL}/getval", files=files, timeout=60)
+ #       response = requests.post(f"{LINUX_WRAPPER_URL}/getval", files=files, timeout=60)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -161,4 +161,5 @@ if __name__ == "__main__":
     import uvicorn
     print("Starting Angular FastAPI Backend on Windows")
     print(f"Forwarding requests to: {LINUX_WRAPPER_URL}")
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
